@@ -18,7 +18,7 @@
 
 ## 🎯 Visão Geral
 
-O **Conversor PPLA para BPLB** é um sistema completo que converte arquivos de etiquetas do formato PPLA (usado por impressoras Zebra) para o formato BPLB (compatível com impressoras Elgin BPT-L42), com capacidade de impressão direta e monitoramento automático de arquivos.
+O **Conversor PPLA para BPLB** é um sistema completo que converte arquivos de etiquetas do formato PPLA (usado por impressoras Argox) para o formato BPLB (compatível com impressoras Elgin BPT-L42), com capacidade de impressão direta e monitoramento automático de arquivos.
 
 ### Características Principais
 - ✅ **Conversão inteligente** de PPLA para BPLB
@@ -436,11 +436,11 @@ Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para de
 ## 🙏 Agradecimentos
 
 - **Elgin** pela documentação da BPT-L42
-- **Zebra** pelo formato PPLA
+- **Argox** pelo formato PPLA
 - **Python Software Foundation**
 - **Comunidade open source**
 
 ---
 
 *Documentação gerada automaticamente pelo sistema - Versão 1.0.0*  
-*Última atualização: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}*
+*Última atualização: 10-02-2026 20:00*
