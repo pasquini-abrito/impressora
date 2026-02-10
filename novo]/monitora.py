@@ -134,6 +134,11 @@ class BPLBGenerator:
         cmd = f"A{x},{y},0,{fonte},{tamanho_h},{tamanho_v},N,\"{texto_limpo}\""
         self.comandos.append(cmd)
         
+    def adicionar_codigo_barras(self, x, y, codigo, tipo=1, largura_fina=3, largura_larga=5, altura=80, exibir_texto='B'):
+        """Adiciona comando de código de barras BPLB"""
+        cmd = f"B{x},{y},0,{tipo},{largura_fina},{largura_larga},{altura},{exibir_texto},\"{codigo}\""
+        self.comandos.append(cmd)
+    
     def adicionar_linha_horizontal(self, x, y, comprimento, espessura=1):
         cmd = f"LE{x},{y},{comprimento},{espessura}"
         self.comandos.append(cmd)
@@ -189,16 +194,51 @@ class PPLAtoBPLBConverter:
             ref_numeros = ''.join(filter(str.isdigit, etiqueta_data['referencia']))
             ref_texto = f"REF: {ref_numeros[:9]}"
         
+        # Adicionar fração no canto superior direito, se existir
+        fracao_texto = ""
+        if etiqueta_data['fracao']:
+            fracao_texto = self.generator.remover_acentos(etiqueta_data['fracao'])
+        
         if op_texto and ref_texto:
+            # OP na primeira linha
             self.generator.adicionar_texto(40, y_pos, op_texto, fonte=3)
-            ref_x = largura - len(ref_texto) * 20 - 40
-            self.generator.adicionar_texto(ref_x, y_pos, ref_texto, fonte=3)
+            
+            # Fração no canto direito (se existir)
+            if fracao_texto:
+                x_fracao = largura - 50 - len(fracao_texto) * 24
+                self.generator.adicionar_texto(x_fracao, y_pos, fracao_texto, fonte=4, tamanho_h=2, tamanho_v=2)
+            
+            y_pos += 30  # Espaço para a linha da REF
+            self.generator.adicionar_texto(40, y_pos, ref_texto, fonte=3)
+            y_pos += 40  # Espaçamento padrão após as duas linhas
+        
         elif op_texto:
             self.generator.adicionar_texto(40, y_pos, op_texto, fonte=3)
+            
+            # Fração no canto direito (se existir)
+            if fracao_texto:
+                x_fracao = largura - 40 - len(fracao_texto) * 24
+                self.generator.adicionar_texto(x_fracao, y_pos, fracao_texto, fonte=4, tamanho_h=2, tamanho_v=2)
+            
+            y_pos += 40
+        
         elif ref_texto:
             self.generator.adicionar_texto(40, y_pos, ref_texto, fonte=3)
-        
-        y_pos += 50
+            
+            # Fração no canto direito (se existir)
+            if fracao_texto:
+                x_fracao = largura - 40 - len(fracao_texto) * 24
+                self.generator.adicionar_texto(x_fracao, y_pos, fracao_texto, fonte=4, tamanho_h=2, tamanho_v=2)
+            
+            y_pos += 40
+        else:
+            # Se não tiver OP nem REF, mas tiver fração, colocar a fração no canto direito
+            if fracao_texto:
+                x_fracao = largura - 40 - len(fracao_texto) * 24
+                self.generator.adicionar_texto(x_fracao, y_pos, fracao_texto, fonte=4, tamanho_h=2, tamanho_v=2)
+                y_pos += 40
+            else:
+                y_pos += 20
         
         if etiqueta_data['descricao']:
             descricao = self.generator.remover_acentos(etiqueta_data['descricao'])
@@ -276,10 +316,14 @@ class PPLAtoBPLBConverter:
             self.generator.adicionar_texto(40, y_pos, regiao_texto, fonte=3)
             y_pos += 40
         
-        if etiqueta_data['fracao']:
-            fracao = self.generator.remover_acentos(etiqueta_data['fracao'])
-            x_centro = (largura - len(fracao) * 24) // 2
-            self.generator.adicionar_texto(x_centro, y_pos + 20, fracao, fonte=4, tamanho_h=2, tamanho_v=2)
+        # ADICIONAR CÓDIGO DE BARRAS (NOVA FUNCIONALIDADE)
+        if etiqueta_data['codigo_barras']:
+            codigo = etiqueta_data['codigo_barras']
+            y_pos += 20  # Adicionar espaço após as informações de cidade/região
+            # Centralizar o código de barras horizontalmente
+            x_barcode = (largura - 400) // 2  # Aproximadamente a largura do código de barras
+            self.generator.adicionar_codigo_barras(x_barcode, y_pos, codigo)
+            y_pos += 100  # Espaço para o código de barras
         
         self.generator.finalizar_etiqueta()
         return self.generator.obter_comandos()
@@ -380,6 +424,7 @@ class PPLAParser:
             'cidade': '',
             'regiao': '',
             'fracao': '',
+            'codigo_barras': '',  # NOVO CAMPO
             'codigos': [],
             'textos': []
         }
@@ -425,8 +470,12 @@ class PPLAParser:
             elif any(p in texto for p in ('CAMISETA', 'BLUSA', 'CALCA')):
                 data['descricao'] = texto
     
+            # Detecta fração (ex: "2/2")
             elif re.match(r'^\d+/\d+$', texto):
                 data['fracao'] = texto
+                # A linha anterior à fração é o código de barras
+                if i > 0 and re.match(r'^\d+$', textos[i-1]) and len(textos[i-1]) >= 12:
+                    data['codigo_barras'] = textos[i-1]
     
             i += 1
 
@@ -442,6 +491,10 @@ def visualizar_etiqueta_bplb(comandos_bplb):
             partes = linha.split('"')
             if len(partes) >= 2:
                 textos.append(partes[1])
+        elif linha.startswith('B'):
+            partes = linha.split('"')
+            if len(partes) >= 2:
+                textos.append(f"[CÓDIGO DE BARRAS: {partes[1]}]")
     
     largura = 50
     print("┌" + "─" * largura + "┐")
