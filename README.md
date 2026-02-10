@@ -1,6 +1,6 @@
 # 🏷️ Conversor PPLA para BPLB - Documentação Completa
 
-![Snorax com Unico na capa](https://via.placeholder.com/800x400/4A90E2/FFFFFF?text=Snorax+com+Unico+na+capa+do+MD)
+![Snorlax](https://i.redd.it/aj7bjvx586oa1.png) <!-- Snorlax -->
 
 ## 📋 Índice
 1. [Visão Geral](#visão-geral)
@@ -431,7 +431,7 @@ conversor-ppla-bplb/
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para detalhes.
+Este projeto está licenciado sob a Apache License - veja o arquivo LICENSE para detalhes.
 
 ## 🙏 Agradecimentos
 
@@ -442,5 +442,6 @@ Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para de
 
 ---
 
+*By @ashiratart*
 *Documentação gerada automaticamente pelo sistema - Versão 1.0.0*  
 *Última atualização: 10-02-2026 20:00*
